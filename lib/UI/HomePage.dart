@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:math_expressions/math_expressions.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -6,17 +7,62 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  var result='';
+  // var result='';
+  String equation='0';
+    String result='0';
+    String expression='';
+    double equationFontSize=38.0;
+    double resultFonSize=48.0;
+
+  buttonPressed (String buttonText ){
+        setState(() {
+        if(buttonText=='C'){
+          equation='0';
+          result='0';
+          equationFontSize=38.0;
+          resultFonSize=48.0;
+        }else if(buttonText=='AC'){
+          equationFontSize=48.0;
+          resultFonSize=38.0;
+          equation=equation.substring(0,equation.length - 1);
+          if(equation==''){
+            equation='0';
+          }
+        }else if(buttonText=='='){
+          equationFontSize=38.0;
+          resultFonSize=48.0;
+          expression=equation;
+          expression=expression.replaceAll('×','*');
+          expression=expression.replaceAll('÷','/');
+
+          try{
+            Parser p = new Parser();
+            Expression exp=p.parse(expression);
+            ContextModel cm=ContextModel();
+            result='${exp.evaluate(EvaluationType.REAL,cm)}';
+          }catch(e){
+            result='Error';
+          }
+
+        }else{
+          equationFontSize=48.0;
+          resultFonSize=38.0;
+          if(equation=='0'){
+            equation=buttonText;
+          }else{
+            equation=equation + buttonText;
+          }
+        }
+      });
+
+  }
+
+
+
   Widget customBox(String text,Color textColor){
     return Expanded(
            child: GestureDetector(
-             onTap: (){
-               print(text);
-               setState(() {
-                 result="$result"+text;
-                 print(result);
-               });
-             },
+             onTap: ()=>buttonPressed(text),
               child: Container(
                height: 70.0,
                alignment: Alignment.center,
@@ -68,10 +114,18 @@ class _HomePageState extends State<HomePage> {
                   children: <Widget>[
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text('$result',
+                      child: Text(equation,
                       style: TextStyle(
-                        fontSize: 48.0,
+                        fontSize: resultFonSize,
                         fontFamily: "Montserrat"
+                      ),
+                      ),
+                    ),
+                    Container(
+                      alignment: Alignment.centerRight,
+                      child: Text(result,
+                      style: TextStyle(
+                        fontSize: resultFonSize
                       ),
                       ),
                     )
@@ -128,13 +182,9 @@ class _HomePageState extends State<HomePage> {
                               print(result);
                             });
                           },
-                        )
-                      ],
-                    )
-
-                    Row(
-                      children: <Widget>[
-                        Container(
+                        
+                      
+                      child: Container(
                           width: MediaQuery.of(context).size.width/2,
                           child: Container(
                             margin: EdgeInsets.only(left: 16.0,right: 16.0),
@@ -165,6 +215,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                           )
                         ),
+                        ),
                         Container(
                           width: MediaQuery.of(context).size.width/2,
                           child: Row(
@@ -176,7 +227,6 @@ class _HomePageState extends State<HomePage> {
                         )
                       ],
                     ),
-
                   ],
                 ),
               ),
